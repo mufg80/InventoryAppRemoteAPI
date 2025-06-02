@@ -74,3 +74,4 @@ C:\Users\smufg\source\repos\InventoryAppRemoteAPI\InventoryAppRemoteAPI\bin\Debu
 C:\Users\smufg\source\repos\InventoryAppRemoteAPI\InventoryAppRemoteAPI\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Diagnostics.EventLog.dll
 C:\Users\smufg\source\repos\InventoryAppRemoteAPI\InventoryAppRemoteAPI\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Security.Cryptography.Pkcs.dll
 C:\Users\smufg\source\repos\InventoryAppRemoteAPI\InventoryAppRemoteAPI\obj\Debug\net8.0\staticwebassets.build.json.cache
+C:\Users\smufg\source\repos\InventoryAppRemoteAPI\InventoryAppRemoteAPI\obj\Debug\net8.0\InventoryAppRemoteAPI.sourcelink.json

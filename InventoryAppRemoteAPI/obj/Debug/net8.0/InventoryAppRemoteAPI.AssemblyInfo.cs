@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("InventoryAppRemoteAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3711cb8c4b62302cfe8d202804da01ecc3c2047f")]
 [assembly: System.Reflection.AssemblyProductAttribute("InventoryAppRemoteAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("InventoryAppRemoteAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

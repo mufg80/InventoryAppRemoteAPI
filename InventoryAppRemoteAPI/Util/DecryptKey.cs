@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Security.Cryptography.Xml;
 using System.Text;
 
@@ -6,11 +7,22 @@ namespace InventoryAppRemoteAPI.Util
 {
     public class DecryptKey
     {
-        private const string api = "Bedyip5Wx+S/F7X3pjaxDS9c2YlJkE0yOTKfZPHOteo=";
-        private const string aeskey = "5pxiTbC8Ty6H4Yp6FA5eGi5P82NC0yOh";
-        private const string iv = "iOGfBfecKtjx62fk";
+        private readonly IConfiguration _config;
+        public DecryptKey(IConfiguration config)
+        {
+            _config = config ?? throw new ArgumentNullException(nameof(config));
+        }
+        private string GetJSONItem(string key)
+        {
+            string retrieved = _config[key];
+            if (string.IsNullOrEmpty(retrieved))
+            {
+                throw new InvalidOperationException("API key is not configured in the application settings.");
+            }
+            return retrieved;
+        }
 
-        public static bool IsValidKey(string key)
+        public bool IsValidKey(string key)
         {
             if (string.IsNullOrEmpty(key))
             {
@@ -20,8 +32,8 @@ namespace InventoryAppRemoteAPI.Util
             byte[] encryptedBytes = Convert.FromBase64String(key);
             using (Aes aes = Aes.Create())
             {
-                aes.Key = Encoding.UTF8.GetBytes(aeskey);
-                aes.IV = Encoding.UTF8.GetBytes(iv);
+                aes.Key = Encoding.UTF8.GetBytes(GetJSONItem("aeskey"));
+                aes.IV = Encoding.UTF8.GetBytes(GetJSONItem("iv"));
                 aes.Mode = CipherMode.CBC;
                 aes.Padding = PaddingMode.PKCS7;
 
@@ -31,7 +43,7 @@ namespace InventoryAppRemoteAPI.Util
                 using (var reader = new System.IO.StreamReader(cs))
                 {
                     string testablekey = reader.ReadToEnd();
-                    return testablekey.Equals(api);
+                    return testablekey.Equals(GetJSONItem("apikey"));
                 }
             }
         }

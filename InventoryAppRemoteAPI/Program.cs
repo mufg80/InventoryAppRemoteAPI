@@ -1,4 +1,5 @@
 
+using InventoryAppRemoteAPI.Util;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -9,7 +10,8 @@ namespace InventoryAppRemoteAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            builder.Services.AddSingleton<DecryptKey>();
+            builder.Services.AddSingleton<Util.DecryptKey>();
             // Add cert for android develepment
 
             builder.WebHost.ConfigureKestrel(serverOptions =>
@@ -21,7 +23,7 @@ namespace InventoryAppRemoteAPI
             });
 
             // Add services to the container.
-            // 
+            
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -39,23 +41,16 @@ namespace InventoryAppRemoteAPI
                 });
 
                 // Apply the security scheme globally
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement{{
+                new OpenApiSecurityScheme
                 {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "ApiKey"
-                }
-            },
-            new List<string>()
-        }
-    });
-
-
-
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "ApiKey"
+                    }
+                },
+                new List<string>()}});
             });
 
             var app = builder.Build();
@@ -75,8 +70,9 @@ namespace InventoryAppRemoteAPI
 
             app.Use(async (context, next) =>
             {
+                var decryptKeyService = context.RequestServices.GetRequiredService<DecryptKey>();
                 // Check for the custom header
-                if (!context.Request.Headers.TryGetValue("X-Encrypted-Api-Key", out var apiKey) || !Util.DecryptKey.IsValidKey(apiKey))
+                if (!context.Request.Headers.TryGetValue("X-Encrypted-Api-Key", out var apiKey) || !decryptKeyService.IsValidKey(apiKey))
                 {
                     context.Response.StatusCode = 401; // Unauthorized
                     await context.Response.WriteAsync("Invalid API Key");
@@ -87,15 +83,9 @@ namespace InventoryAppRemoteAPI
                 // Call the next middleware in the pipeline
                 await next.Invoke();
             });
-
-
             app.UseHttpsRedirection();
-
             app.UseAuthorization();
-
-
             app.MapControllers();
-
             app.Run();
         }
     }
