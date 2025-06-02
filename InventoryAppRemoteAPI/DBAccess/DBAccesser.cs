@@ -1,16 +1,25 @@
-﻿
-
-
-using InventoryAppRemoteAPI.Models;
+﻿using InventoryAppRemoteAPI.Models;
 using Microsoft.Data.SqlClient;
 using System.Collections.Generic;
 
 namespace InventoryAppRemoteAPI.DBAccess
 {
+    /// <summary>
+    /// Handles database interactions for inventory items.
+    /// Author: Shannon Musgrave
+    /// </summary>
     public class DBAccesser
     {
-        string connectionString = @"Data Source=(localdb)\ProjectModels;Initial Catalog=InventoryItems;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
-         // Create: Insert a new record
+        /// <summary>
+        /// Connection string for SQL database access.
+        /// </summary>
+        private string connectionString = @"Data Source=(localdb)\ProjectModels;Initial Catalog=InventoryItems;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
+
+        /// <summary>
+        /// Creates a new inventory record in the database.
+        /// </summary>
+        /// <param name="item">The inventory item to be inserted.</param>
+        /// <returns>True if insertion was successful, otherwise false.</returns>
         public bool CreateRecord(InventoryItem item)
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
@@ -21,14 +30,13 @@ namespace InventoryAppRemoteAPI.DBAccess
                     string query = "INSERT INTO InventoryItemList (Title, Description, Quantity, UserId) VALUES (@Title, @Description, @Quantity, @UserId)";
                     using (SqlCommand command = new SqlCommand(query, connection))
                     {
-                        //command.Parameters.AddWithValue("@ID", item.Id);
-                        command.Parameters.AddWithValue("@Title", item.Title ?? (object)DBNull.Value); // Handle null strings
+                        // Adding parameters to prevent SQL injection
+                        command.Parameters.AddWithValue("@Title", item.Title ?? (object)DBNull.Value);
                         command.Parameters.AddWithValue("@Description", item.Description ?? (object)DBNull.Value);
                         command.Parameters.AddWithValue("@Quantity", item.Quantity);
                         command.Parameters.AddWithValue("@UserId", item.UserId);
                         command.ExecuteNonQuery();
                     }
-                    Console.WriteLine("Record created successfully.");
                     return true;
                 }
                 catch (Exception ex)
@@ -39,7 +47,10 @@ namespace InventoryAppRemoteAPI.DBAccess
             }
         }
 
-        // Read: Retrieve all records
+        /// <summary>
+        /// Retrieves all inventory records from the database.
+        /// </summary>
+        /// <returns>List of inventory items.</returns>
         public List<InventoryItem> ReadRecords()
         {
             var records = new List<InventoryItem>();
@@ -61,7 +72,7 @@ namespace InventoryAppRemoteAPI.DBAccess
                                     Title = reader.GetString(1),
                                     Description = reader.GetString(2),
                                     Quantity = reader.GetInt32(3),
-                                    UserId = reader.GetInt32(4) // Adjust to GetInt32 if UserId is int
+                                    UserId = reader.GetInt32(4)
                                 });
                             }
                         }
@@ -75,7 +86,11 @@ namespace InventoryAppRemoteAPI.DBAccess
             return records;
         }
 
-        // Read: Retrieve a single record by ID
+        /// <summary>
+        /// Retrieves a specific inventory record by ID.
+        /// </summary>
+        /// <param name="id">The record ID to fetch.</param>
+        /// <returns>The inventory item if found, otherwise null.</returns>
         public InventoryItem ReadRecordById(int id)
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
@@ -97,7 +112,7 @@ namespace InventoryAppRemoteAPI.DBAccess
                                     Title = reader.GetString(1),
                                     Description = reader.GetString(2),
                                     Quantity = reader.GetInt32(3),
-                                    UserId = reader.GetInt32(4) // Adjust to GetInt32 if UserId is int
+                                    UserId = reader.GetInt32(4)
                                 };
                             }
                         }
@@ -111,7 +126,11 @@ namespace InventoryAppRemoteAPI.DBAccess
             }
         }
 
-        // Update: Update a record by ID
+        /// <summary>
+        /// Updates an existing inventory record in the database.
+        /// </summary>
+        /// <param name="item">The updated inventory item.</param>
+        /// <returns>True if update was successful, otherwise false.</returns>
         public bool UpdateRecord(InventoryItem item)
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
@@ -127,18 +146,8 @@ namespace InventoryAppRemoteAPI.DBAccess
                         command.Parameters.AddWithValue("@Description", item.Description ?? (object)DBNull.Value);
                         command.Parameters.AddWithValue("@Quantity", item.Quantity);
                         command.Parameters.AddWithValue("@UserId", item.UserId);
-                        int rowsAffected = command.ExecuteNonQuery();
-                        if (rowsAffected > 0)
-                        {
-                            Console.WriteLine("Record updated successfully.");
-                            return true;
-                        }                            
-                        else
-                        {
-                            Console.WriteLine("No record found with the specified ID.");
-                            return false;
-                        }
-                           
+
+                        return command.ExecuteNonQuery() > 0;
                     }
                 }
                 catch (Exception ex)
@@ -149,7 +158,11 @@ namespace InventoryAppRemoteAPI.DBAccess
             }
         }
 
-        // Delete: Delete a record by ID
+        /// <summary>
+        /// Deletes an inventory record by ID.
+        /// </summary>
+        /// <param name="id">The ID of the record to delete.</param>
+        /// <returns>True if deletion was successful, otherwise false.</returns>
         public bool DeleteRecord(int id)
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
@@ -161,18 +174,7 @@ namespace InventoryAppRemoteAPI.DBAccess
                     using (SqlCommand command = new SqlCommand(query, connection))
                     {
                         command.Parameters.AddWithValue("@ID", id);
-                        int rowsAffected = command.ExecuteNonQuery();
-                        if (rowsAffected > 0)
-                        {
-                            Console.WriteLine("Record deleted successfully.");
-                            return true;
-                        }                            
-                        else
-                        {
-                            Console.WriteLine("No record found with the specified ID.");
-                            return false;
-                        }
-                           
+                        return command.ExecuteNonQuery() > 0;
                     }
                 }
                 catch (Exception ex)
@@ -182,6 +184,5 @@ namespace InventoryAppRemoteAPI.DBAccess
                 }
             }
         }
-
     }
 }
