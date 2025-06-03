@@ -32,7 +32,7 @@ namespace InventoryAppRemoteAPI.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<InventoryItem>> Get([FromQuery] int userId)
         {
-            if(userId < 0)
+            if (userId < 0)
             {
                 return BadRequest("Invalid user ID provided.");
             }
@@ -44,7 +44,7 @@ namespace InventoryAppRemoteAPI.Controllers
                 var userItems = from m in success.Item2
                                 where m.UserId == userId
                                 select m;
-                if(userItems.Count() == 0)
+                if (userItems.Count() == 0)
                 {
                     return NotFound("No items found for the specified user ID.");
                 }
@@ -54,7 +54,7 @@ namespace InventoryAppRemoteAPI.Controllers
             {
                 return NotFound("No items found for the specified user ID.");
             }
-            
+
         }
 
         /// <summary>
@@ -121,7 +121,7 @@ namespace InventoryAppRemoteAPI.Controllers
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
-            if(id < 0)
+            if (id < 0)
             {
                 return BadRequest("Invalid inventory item ID provided.");
             }
@@ -137,5 +137,5 @@ namespace InventoryAppRemoteAPI.Controllers
                 return NotFound();  // Deletion failed
             }
         }
-
+    }
 }

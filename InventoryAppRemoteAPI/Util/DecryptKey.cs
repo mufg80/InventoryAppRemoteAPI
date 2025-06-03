@@ -1,7 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
-using System.Text;
-
+﻿
 namespace InventoryAppRemoteAPI.Util
 {
     /// <summary>
@@ -53,30 +50,7 @@ namespace InventoryAppRemoteAPI.Util
             {
                 return false;
             }
-
-            // Convert the base64-encoded string into byte array for decryption
-            byte[] encryptedBytes = Convert.FromBase64String(key);
-
-            using (Aes aes = Aes.Create())
-            {
-                // Retrieve stored encryption key and IV from configuration
-                aes.Key = Encoding.UTF8.GetBytes(GetJSONItem("aeskey"));
-                aes.IV = Encoding.UTF8.GetBytes(GetJSONItem("iv"));
-                aes.Mode = CipherMode.CBC;
-                aes.Padding = PaddingMode.PKCS7;
-
-                // Perform decryption
-                using (ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV))
-                using (var ms = new System.IO.MemoryStream(encryptedBytes))
-                using (var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
-                using (var reader = new System.IO.StreamReader(cs))
-                {
-                    string testableKey = reader.ReadToEnd();
-
-                    // Compare decrypted key with stored API key
-                    return testableKey.Equals(GetJSONItem("apikey"));
-                }
-            }
+            return key.Equals(GetJSONItem("apikey"));
         }
     }
 }
