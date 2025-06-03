@@ -32,13 +32,29 @@ namespace InventoryAppRemoteAPI.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<InventoryItem>> Get([FromQuery] int userId)
         {
+            if(userId < 0)
+            {
+                return BadRequest("Invalid user ID provided.");
+            }
             // Filter items based on user ID
             // If fails, returns newlist.
-            var userItems = from m in db.ReadRecords()
-                            where m.UserId == userId
-                            select m;
-
-            return Ok(userItems);
+            var success = db.ReadRecords();
+            if (success.Item1)
+            {
+                var userItems = from m in success.Item2
+                                where m.UserId == userId
+                                select m;
+                if(userItems.Count() == 0)
+                {
+                    return NotFound("No items found for the specified user ID.");
+                }
+                return Ok(userItems);
+            }
+            else
+            {
+                return NotFound("No items found for the specified user ID.");
+            }
+            
         }
 
         /// <summary>
@@ -50,6 +66,11 @@ namespace InventoryAppRemoteAPI.Controllers
         [HttpPost]
         public ActionResult<int> Post([FromBody] InventoryItem item)
         {
+            // Check if the item is valid
+            if (!db.IsValidInventoryItem(item))
+            {
+                return BadRequest("Invalid inventory item data provided.");
+            }
             // Attempt to create the new inventory item
             var isCreated = db.CreateRecord(item);
 
@@ -73,6 +94,11 @@ namespace InventoryAppRemoteAPI.Controllers
         [HttpPut("{id}")]
         public ActionResult Put(int id, [FromBody] InventoryItem item)
         {
+            // Check if the item is valid
+            if (!db.IsValidInventoryItem(item) || id < 0)
+            {
+                return BadRequest("Invalid inventory item data provided.");
+            }
             // Attempt to update the inventory item
             var isUpdated = db.UpdateRecord(item);
 
@@ -95,6 +121,10 @@ namespace InventoryAppRemoteAPI.Controllers
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
+            if(id < 0)
+            {
+                return BadRequest("Invalid inventory item ID provided.");
+            }
             // Attempt to delete the inventory item
             var isDeleted = db.DeleteRecord(id);
 
@@ -107,5 +137,5 @@ namespace InventoryAppRemoteAPI.Controllers
                 return NotFound();  // Deletion failed
             }
         }
-    }
+
 }

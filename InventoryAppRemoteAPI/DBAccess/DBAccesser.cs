@@ -80,7 +80,7 @@ namespace InventoryAppRemoteAPI.DBAccess
         /// Retrieves all inventory records from the database.
         /// </summary>
         /// <returns>List of inventory items.</returns>
-        public List<InventoryItem> ReadRecords()
+        public (bool, List<InventoryItem>) ReadRecords()
         {
             var records = new List<InventoryItem>();
             using (SqlConnection connection = new SqlConnection(GetJSONItem("ConnectionString")))
@@ -110,9 +110,10 @@ namespace InventoryAppRemoteAPI.DBAccess
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error reading records: {ex.Message}");
+                    return (false, records); // Return false with empty list on error
                 }
             }
-            return records;
+            return (true, records);
         }
 
 
@@ -174,5 +175,36 @@ namespace InventoryAppRemoteAPI.DBAccess
                 }
             }
         }
+
+        /// <summary>
+        /// Validates input before submitting to the database.
+        /// </summary>
+        /// <param item>Inventory object to validate.</param>
+        /// <returns>True if validation successful, otherwise false.</returns>
+        public bool IsValidInventoryItem(InventoryItem item)
+        {
+            if (item == null)
+            {
+                return false; // Item cannot be null
+            }
+            if (string.IsNullOrWhiteSpace(item.Title) || string.IsNullOrWhiteSpace(item.Description))
+            {
+                return false; // Title and Description cannot be empty or whitespace
+            }
+            if (item.Title.Length > 30 || item.Description.Length > 40)
+            {
+                return false; // Title and Description length constraints
+            }
+            if (item.Quantity < 0)
+            {
+                return false; // Quantity cannot be negative
+            }
+            if (item.UserId <= 0)
+            {
+                return false; // UserId must be a positive integer
+            }
+            return true;
+        }
+
     }
 }
