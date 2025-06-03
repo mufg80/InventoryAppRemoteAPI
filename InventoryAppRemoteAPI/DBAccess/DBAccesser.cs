@@ -10,19 +10,48 @@ namespace InventoryAppRemoteAPI.DBAccess
     /// </summary>
     public class DBAccesser
     {
+
         /// <summary>
-        /// Connection string for SQL database access.
+        /// Configuration object used for retrieving connection string.
         /// </summary>
-        private string connectionString = @"Data Source=(localdb)\ProjectModels;Initial Catalog=InventoryItems;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
+        private readonly IConfiguration _config;
+
+        /// <summary>
+        /// Constructor that initializes the configuration dependency.
+        /// </summary>
+        /// <param name="config">Injected configuration instance.</param>
+        public DBAccesser(IConfiguration config)
+        {
+            _config = config ?? throw new ArgumentNullException(nameof(config));
+        }
+
+        /// <summary>
+        /// Retrieves a value from the application's configuration settings.
+        /// </summary>
+        /// <param name="key">The configuration key to retrieve.</param>
+        /// <returns>The corresponding configuration value.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if the key is not found.</exception>
+        private string GetJSONItem(string key)
+        {
+            string retrieved = _config[key];
+
+            if (string.IsNullOrEmpty(retrieved))
+            {
+                throw new InvalidOperationException($"The key '{key}' is not configured in the application settings.");
+            }
+
+            return retrieved;
+        }
 
         /// <summary>
         /// Creates a new inventory record in the database.
         /// </summary>
         /// <param name="item">The inventory item to be inserted.</param>
         /// <returns>True if insertion was successful, otherwise false.</returns>
+        /// 
         public bool CreateRecord(InventoryItem item)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            using (SqlConnection connection = new SqlConnection(GetJSONItem("ConnectionString")))
             {
                 try
                 {
@@ -54,7 +83,7 @@ namespace InventoryAppRemoteAPI.DBAccess
         public List<InventoryItem> ReadRecords()
         {
             var records = new List<InventoryItem>();
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            using (SqlConnection connection = new SqlConnection(GetJSONItem("ConnectionString")))
             {
                 try
                 {
@@ -86,45 +115,6 @@ namespace InventoryAppRemoteAPI.DBAccess
             return records;
         }
 
-        /// <summary>
-        /// Retrieves a specific inventory record by ID.
-        /// </summary>
-        /// <param name="id">The record ID to fetch.</param>
-        /// <returns>The inventory item if found, otherwise null.</returns>
-        public InventoryItem ReadRecordById(int id)
-        {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                try
-                {
-                    connection.Open();
-                    string query = "SELECT Id, Title, Description, Quantity, UserId FROM InventoryItemList WHERE Id = @ID";
-                    using (SqlCommand command = new SqlCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@ID", id);
-                        using (SqlDataReader reader = command.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                return new InventoryItem
-                                {
-                                    Id = reader.GetInt32(0),
-                                    Title = reader.GetString(1),
-                                    Description = reader.GetString(2),
-                                    Quantity = reader.GetInt32(3),
-                                    UserId = reader.GetInt32(4)
-                                };
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error reading record: {ex.Message}");
-                }
-                return null;
-            }
-        }
 
         /// <summary>
         /// Updates an existing inventory record in the database.
@@ -133,7 +123,7 @@ namespace InventoryAppRemoteAPI.DBAccess
         /// <returns>True if update was successful, otherwise false.</returns>
         public bool UpdateRecord(InventoryItem item)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            using (SqlConnection connection = new SqlConnection(GetJSONItem("ConnectionString")))
             {
                 try
                 {
@@ -165,7 +155,7 @@ namespace InventoryAppRemoteAPI.DBAccess
         /// <returns>True if deletion was successful, otherwise false.</returns>
         public bool DeleteRecord(int id)
         {
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            using (SqlConnection connection = new SqlConnection(GetJSONItem("ConnectionString")))
             {
                 try
                 {

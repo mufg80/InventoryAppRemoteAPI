@@ -18,9 +18,9 @@ namespace InventoryAppRemoteAPI.Controllers
         /// Constructor for InventoryController.
         /// Initializes database access object.
         /// </summary>
-        public InventoryController()
+        public InventoryController(DBAccesser databaseaccesser)
         {
-            db = new DBAccesser();
+            db = databaseaccesser;
         }
 
         /// <summary>
@@ -33,6 +33,7 @@ namespace InventoryAppRemoteAPI.Controllers
         public ActionResult<IEnumerable<InventoryItem>> Get([FromQuery] int userId)
         {
             // Filter items based on user ID
+            // If fails, returns newlist.
             var userItems = from m in db.ReadRecords()
                             where m.UserId == userId
                             select m;

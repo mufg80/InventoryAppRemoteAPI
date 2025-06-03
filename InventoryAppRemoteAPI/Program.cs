@@ -1,3 +1,4 @@
+using InventoryAppRemoteAPI.DBAccess;
 using InventoryAppRemoteAPI.Util;
 using Microsoft.OpenApi.Models;
 
@@ -20,6 +21,7 @@ namespace InventoryAppRemoteAPI
 
             // Register DecryptKey service for API key validation
             builder.Services.AddSingleton<DecryptKey>();
+            builder.Services.AddSingleton<DBAccesser>();
 
             // Add services to the container
             builder.Services.AddControllers();
