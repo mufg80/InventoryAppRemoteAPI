@@ -79,6 +79,7 @@ Note: All requests must include the X-Encrypted-Api-Key header with a valid encr
 ## Usage
 
 The Inventory App Remote API supports four primary use cases:
+
 Retrieve Items: Fetches all inventory items for a given userId via a GET request.
 Endpoint: GET /api/Inventory?userId={userId}
 
@@ -92,7 +93,7 @@ Body: JSON object with Title, Description, Quantity, and UserId.
 Update Item: Modifies an existing item by id via a PUT request.
 Endpoint: PUT /api/Inventory/{id}
 
-Body: JSON object with updated Title, Description, Quantity, and UserId.
+Body: JSON object with item id and updated Title, Description, Quantity, and UserId.
 
 Delete Item: Removes an item by id via a DELETE request.
 Endpoint: DELETE /api/Inventory/{id}
