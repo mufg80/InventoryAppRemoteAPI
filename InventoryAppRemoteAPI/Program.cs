@@ -19,7 +19,7 @@ namespace InventoryAppRemoteAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Register DecryptKey service for API key validation
+            // Register DecryptKey and DBAccesser services for dependency injection
             builder.Services.AddSingleton<DecryptKey>();
             builder.Services.AddSingleton<DBAccesser>();
 
@@ -32,7 +32,7 @@ namespace InventoryAppRemoteAPI
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
 
-                // Define API key security scheme for authentication
+                // Define API key security scheme for authentication This ensures Swagger will authorize requests using the API key
                 c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
                 {
                     Description = "Encrypted API key needed to access the endpoints. X-Encrypted-Api-Key: <encrypted_key>",
@@ -57,7 +57,7 @@ namespace InventoryAppRemoteAPI
                 }});
             });
 
-            // Configure HTTPS and certificate settings for Android development
+            // Configure HTTPS and certificate settings for Android development only.
             builder.WebHost.ConfigureKestrel(serverOptions =>
             {
                 serverOptions.ListenAnyIP(7113, listenOptions =>
@@ -84,7 +84,8 @@ namespace InventoryAppRemoteAPI
             {
                 var decryptKeyService = context.RequestServices.GetRequiredService<DecryptKey>();
 
-                // Check if the request contains a valid API key header
+                // Check if the request contains a valid API key header this checks that the api key has been sent by android device
+                // andn returns 401 Unauthorized if not present or invalid.
                 if (!context.Request.Headers.TryGetValue("X-Encrypted-Api-Key", out var apiKey) || !decryptKeyService.IsValidKey(apiKey))
                 {
                     context.Response.StatusCode = 401; // Unauthorized

@@ -83,14 +83,19 @@ namespace InventoryAppRemoteAPI.DBAccess
         public (bool, List<InventoryItem>) ReadRecords()
         {
             var records = new List<InventoryItem>();
+
             using (SqlConnection connection = new SqlConnection(GetJSONItem("ConnectionString")))
             {
                 try
                 {
                     connection.Open();
-                    string query = "SELECT Id, Title, Description, Quantity, UserId FROM InventoryItemList";
+                    // Using a simple query that always returns true to fetch all records, ready for future enhancements.
+                    string query = "SELECT Id, Title, Description, Quantity, UserId FROM InventoryItemList WHERE 1 = @AlwaysTrue";
+
                     using (SqlCommand command = new SqlCommand(query, connection))
                     {
+                        command.Parameters.AddWithValue("@AlwaysTrue", 1); // For future development, this can be modified to include more complex queries
+
                         using (SqlDataReader reader = command.ExecuteReader())
                         {
                             while (reader.Read())
@@ -110,9 +115,10 @@ namespace InventoryAppRemoteAPI.DBAccess
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error reading records: {ex.Message}");
-                    return (false, records); // Return false with empty list on error
+                    return (false, records);
                 }
             }
+
             return (true, records);
         }
 
