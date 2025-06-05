@@ -53,7 +53,7 @@ csharp. Add SQL authentication for the database and insert into connection strin
 Data Source=(localdb)\ProjectModels;Initial Catalog=InventoryItems;Integrated Security=True
 
 Create the InventoryItemList table in the database with the following schema:
-sql
+```sql
 
 CREATE TABLE InventoryItemList (
     Id INT PRIMARY KEY IDENTITY(1,1),
@@ -62,7 +62,7 @@ CREATE TABLE InventoryItemList (
     Quantity INT,
     UserId INT
 );
-
+```
 Download or clone the project files to a local directory.
 
 For development with HTTPS, ensure the localhost.pfx certificate is available, or generate a new one using:
@@ -99,10 +99,12 @@ Endpoint: DELETE /api/Inventory/{id}
 
 Important: All requests require the X-Encrypted-Api-Key header for authentication. Invalid or missing keys result in a 401 Unauthorized response.
 
-## Code Example
+## Code Examples
 
 Below are examples of key API operations based on the provided source code.
-Example A: Retrieve Items by User ID
+
+### Example A: Retrieve Items by User ID
+
 The Get method retrieves all inventory items for a specified userId.
 ```csharp
 [HttpGet]
@@ -134,7 +136,9 @@ public ActionResult<IEnumerable<InventoryItem>> Get([FromQuery] int userId)
 
 ```
 This queries the InventoryItemList table, filters by UserId, and returns a list of matching items.
-Example B: Create a New Item
+
+### Example B: Create a New Item
+
 The Post method inserts a new inventory item into the database.
 ```csharp
 [HttpPost]
@@ -159,7 +163,9 @@ public ActionResult<int> Post([FromBody] InventoryItem item)
 }
 ```
 This calls DBAccesser.CreateRecord to insert a new record with Title, Description, Quantity, and UserId. It returns 1 on success or 404 on failure.
-Example C: API Key Authentication
+
+### Example C: API Key Authentication
+
 The Program.cs middleware enforces API key validation.
 ```csharp
 
@@ -183,6 +189,7 @@ The Program.cs middleware enforces API key validation.
 This checks for a valid X-Encrypted-Api-Key header using AES decryption before allowing access to endpoints.
 
 ## Contact
+
 Shannon Musgrave
 shannon.musgrave@snhu.edu (mailto:shannon.musgrave@snhu.edu)
 
