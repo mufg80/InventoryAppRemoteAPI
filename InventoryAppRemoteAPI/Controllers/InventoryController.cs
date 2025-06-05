@@ -54,7 +54,6 @@ namespace InventoryAppRemoteAPI.Controllers
             {
                 return NotFound("No items found for the specified user ID.");
             }
-
         }
 
         /// <summary>
