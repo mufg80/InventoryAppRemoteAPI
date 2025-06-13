@@ -192,5 +192,6 @@ This checks for a valid X-Encrypted-Api-Key header using AES decryption before a
 ## Contact
 
 Shannon Musgrave
+
 mufg80@hotmail.com (mailto:mufg80@hotmail.com)
 
