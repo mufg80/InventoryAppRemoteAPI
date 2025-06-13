@@ -1,4 +1,7 @@
 ﻿
+using System.Security.Cryptography;
+using System.Text;
+
 namespace InventoryAppRemoteAPI.Util
 {
     /// <summary>
@@ -7,6 +10,7 @@ namespace InventoryAppRemoteAPI.Util
     /// </summary>
     public class DecryptKey
     {
+        private static string apikey = "";
         /// <summary>
         /// Configuration object used for retrieving stored encryption keys.
         /// </summary>
@@ -29,7 +33,7 @@ namespace InventoryAppRemoteAPI.Util
         /// <exception cref="InvalidOperationException">Thrown if the key is not found.</exception>
         private string GetJSONItem(string key)
         {
-            string retrieved = _config[key];
+            string? retrieved = _config[key];
 
             if (string.IsNullOrEmpty(retrieved))
             {
@@ -50,7 +54,46 @@ namespace InventoryAppRemoteAPI.Util
             {
                 return false;
             }
-            return key.Equals(GetJSONItem("apikey"));
+            return PerformCryptology(key);
+        }
+
+        /// <summary>
+        /// Validates an encrypted API key by decrypting it and comparing it to the stored key.
+        /// </summary>
+        /// <param name="key">The encrypted API key received in a request.</param>
+        /// <returns>True if the decrypted key matches the stored key; otherwise, false.</returns>
+
+        private bool PerformCryptology(string key)
+        {
+            if(apikey.Length > 0)
+            {
+                return key.Equals(apikey);
+            }
+
+            string keyfromsettings = GetJSONItem("apikey");
+
+            byte[] bytestoencrypt = Encoding.UTF8.GetBytes(keyfromsettings);
+            using (Aes aes = Aes.Create())
+            {
+                // Retrieve stored encryption key and IV from configuration
+                aes.Key = Encoding.UTF8.GetBytes(GetJSONItem("aeskey"));
+                aes.IV = Encoding.UTF8.GetBytes(GetJSONItem("aesiv"));
+                aes.Mode = CipherMode.CBC;
+                aes.Padding = PaddingMode.PKCS7;
+
+
+                // Perform encryption
+                using (ICryptoTransform cryptor = aes.CreateEncryptor(aes.Key, aes.IV))
+                using (var ms = new System.IO.MemoryStream())
+                using (var cs = new CryptoStream(ms, cryptor, CryptoStreamMode.Write))
+                {
+                    cs.Write(bytestoencrypt, 0, bytestoencrypt.Length);
+                    cs.FlushFinalBlock();
+                    var convertedString = Convert.ToBase64String(ms.ToArray());
+                    apikey = convertedString; // Cache the encrypted key for future use
+                    return apikey.Equals(key);
+                }
+            }
         }
     }
 }
